@@ -80,6 +80,11 @@ python manage.py makemigrations
 python manage.py migrate
 python manage.py createsuperuser
 
+# Carga los datos geográficos de países, departamentos y municipios
+python manage.py import_countries
+python manage.py import_departments
+python manage.py import_municipalities
+
 # Corre el servidor
 python manage.py runserver
 ```
