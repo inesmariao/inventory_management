@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.log
+*.sqlite3
+*.env
+*.env.*
+*.pyo
+*.pyd
+*.pyc
+
+# Entornos virtuales
+venv*/
+venv_inventory/
+
+# Configuraciones de editor
+*.idea/
+*.vscode/
+
+# Archivos de base de datos (PostgreSQL)
+*.pgsql
+*.psql
+*.dump
+*.backup
+*.sql
+
+# Archivos temporales comunes
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
