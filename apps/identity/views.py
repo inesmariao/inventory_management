@@ -11,6 +11,9 @@ from apps.identity.models import User
 
 @extend_schema(request=LoginSerializer, responses={200: None})
 class LoginView(APIView):
+    """
+    Handles the login process by validating credentials and generating JWT tokens.
+    """
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -24,12 +27,18 @@ class LoginView(APIView):
         return Response(result, status=status.HTTP_200_OK)
 
 class UserCreateView(generics.CreateAPIView):
+    """
+    Allows an admin to create a new user in the system.
+    """
     queryset = User.objects.all()
     serializer_class = UserCreateSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
 
 class UserListView(generics.ListAPIView):
+    """
+    Returns a list of all active users.
+    """
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
@@ -49,6 +58,9 @@ class UserDetailView(generics.RetrieveAPIView):
 
 
 class UserUpdateView(generics.UpdateAPIView):
+    """
+    Allows an admin to update an existing user's information.
+    """
     queryset = User.objects.all()
     serializer_class = UserDetailSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
@@ -80,6 +92,9 @@ class UserSoftDeleteView(APIView):
     }
 )
 class UserRestoreView(APIView):
+    """
+    Allows an admin to restore a soft-deleted user.
+    """
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
     def post(self, request, pk):
