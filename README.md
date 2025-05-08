@@ -1,2 +1,0 @@
-# inventory_management
-inventory_management
