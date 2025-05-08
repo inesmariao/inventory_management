@@ -5,9 +5,10 @@ from django.utils import timezone
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'code', 'company', 'price', 'currency', 'is_active', 'deleted_at')
+    list_display = ('id', 'name', 'code', 'company', 'price', 'currency', 'stock', 'is_active', 'deleted_at')
     list_filter = ('company', 'currency', 'is_active')
     search_fields = ('name', 'code', 'company__name')
+    readonly_fields = ('deleted_at',)
     ordering = ('-created_at',)
 
     actions = ['soft_delete_products', 'restore_products']

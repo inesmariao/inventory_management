@@ -20,6 +20,7 @@ class Product(models.Model):
     characteristics = models.TextField()
     price = models.DecimalField(max_digits=10, decimal_places=2)
     currency = models.CharField(max_length=10, choices=CURRENCY_CHOICES, default='COP')
+    stock = models.PositiveIntegerField(default=0)
     is_active = models.BooleanField(
         default=True,
         help_text="Designates whether this product should be treated as active."
