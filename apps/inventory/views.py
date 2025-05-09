@@ -8,6 +8,12 @@ from .models import InventoryItem
 from .serializers import InventoryItemSerializer
 from rest_framework.permissions import IsAuthenticated
 from apps.identity.role_permissions import IsAdmin
+from django.http import HttpResponse
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
+from .models import InventoryItem
+from django.core.mail import EmailMessage
+from decouple import config
 
 class InventoryItemSerializer(serializers.ModelSerializer):
     class Meta:
@@ -120,3 +126,90 @@ class InventoryItemDeleteView(APIView):
 
         except InventoryItem.DoesNotExist:
             return Response({"error": "Inventory item not found."}, status=status.HTTP_404_NOT_FOUND)
+
+def generate_inventory_pdf(request):
+    inventory_items = InventoryItem.objects.all()
+
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = 'attachment; filename="inventory_report.pdf"'
+
+    p = canvas.Canvas(response, pagesize=letter)
+    p.setFont("Helvetica", 12)
+
+    # PDF title
+    p.drawString(200, 750, "Inventory Report")
+
+    y_position = 730
+
+    # Columns for the report
+    p.drawString(40, y_position, "Product")
+    p.drawString(200, y_position, "Quantity")
+    p.drawString(300, y_position, "Purchase Price")
+    p.drawString(400, y_position, "Sale Price")
+    p.drawString(500, y_position, "Profit")
+
+    y_position -= 20
+
+    # Print the inventory items on the PDF
+    for item in inventory_items:
+        p.drawString(40, y_position, str(item.product.name))
+        p.drawString(200, y_position, str(item.quantity))
+        p.drawString(300, y_position, str(item.purchase_price))
+        p.drawString(400, y_position, str(item.sale_price))
+        p.drawString(500, y_position, str(item.profit))
+        y_position -= 20
+
+        if y_position < 100:
+            p.showPage()
+            p.setFont("Helvetica", 12)
+            y_position = 750
+            p.drawString(40, y_position, "Product")
+            p.drawString(200, y_position, "Quantity")
+            p.drawString(300, y_position, "Purchase Price")
+            p.drawString(400, y_position, "Sale Price")
+            p.drawString(500, y_position, "Profit")
+            y_position -= 20
+
+    p.showPage()
+    p.save()
+
+    return response
+
+
+def send_inventory_pdf_email(request):
+    response = generate_inventory_pdf(request)
+    pdf_content = response.content
+
+    email_subject = "Inventory Report"
+    email_body = """
+    Dear recipient,
+
+    Please find attached the inventory report PDF for your reference.
+
+    If you have any questions, feel free to reach out.
+
+    Best regards,
+    LiteThinking
+    """
+
+    recipient_email = config('EMAIL_RECIPIENT')
+
+    from_email = config('DEFAULT_FROM_EMAIL')
+
+    email = EmailMessage(
+        subject=email_subject,
+        body=email_body,
+        from_email=from_email,
+        to=[recipient_email]
+    )
+
+    email.attach('inventory_report.pdf', pdf_content, 'application/pdf')
+
+    try:
+        email.send()
+        return HttpResponse("Email sent successfully.")
+    except Exception as e:
+        return HttpResponse(f"Failed to send email. Error: {str(e)}")
+
+
+
